@@ -32,7 +32,7 @@ const FESTA = {
   endereco: "Col. Taquaral — São Mateus do Sul — PR",
   cidade: "CEP 83900-000",
   mapsQuery: "Salão das Araucárias II, Colônia Taquaral, São Mateus do Sul, PR, 83900-000",
-  whatsapp: "5541984576984",
+  whatsapp: "5542999967306",
   traje: "Esporte Fino",
   avisoTraje: "Por favor, evite roupas na cor rosa.",
   confirmarAte: "01/10/2026",
