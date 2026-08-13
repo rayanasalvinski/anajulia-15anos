@@ -38,6 +38,35 @@ const FESTA = {
   confirmarAte: "01/10/2026",
 }
 
+// Formulário do Google que registra a lista de confirmados numa planilha
+const GOOGLE_FORM_ID = "1FAIpQLSd1LKf48OipATQR1lpz_yKTIFvsyw35II-QiJMdOFKC00oDoA"
+const GOOGLE_FORM_ACTION = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`
+const GOOGLE_FORM_ENTRY_NOME = "entry.442733613"
+const GOOGLE_FORM_ENTRY_ACOMPANHANTES = "entry.1135942399"
+
+/**
+ * Envia a confirmação para o Google Forms de forma silenciosa (sem redirecionar o usuário).
+ * Usa modo "no-cors" porque o Google Forms não retorna cabeçalhos CORS, mas o envio funciona normalmente.
+ */
+async function registrarConfirmacaoNoFormulario(nome: string, acompanhantes: string) {
+  try {
+    const dados = new URLSearchParams()
+    dados.append(GOOGLE_FORM_ENTRY_NOME, nome)
+    // O campo "Acompanhantes" no formulário aceita resposta livre via "outra opção"
+    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES, "__other_option__")
+    dados.append(`${GOOGLE_FORM_ENTRY_ACOMPANHANTES}.other_option_response`, acompanhantes)
+
+    await fetch(GOOGLE_FORM_ACTION, {
+      method: "POST",
+      mode: "no-cors",
+      body: dados,
+    })
+  } catch (error) {
+    // Mesmo que o registro falhe, não bloqueia a confirmação via WhatsApp
+    console.error("Não foi possível registrar a confirmação no formulário:", error)
+  }
+}
+
 export function BirthdayInvite() {
   const [view, setView] = useState<View>("home")
 
@@ -265,6 +294,10 @@ function PresencaView({ onBack }: { onBack: () => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Registra a confirmação na planilha (via Google Forms) em paralelo, sem travar o fluxo
+    registrarConfirmacaoNoFormulario(nome, acompanhantes)
+
     const texto = `Olá! Confirmo presença nos 15 anos da ${FESTA.nome}.%0ANome: ${nome}%0AAcompanhantes: ${acompanhantes}`
     window.open(`https://wa.me/${FESTA.whatsapp}?text=${texto}`, "_blank")
     setEnviado(true)
