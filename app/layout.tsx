@@ -2,26 +2,22 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Great_Vibes, Montserrat } from 'next/font/google'
 import './globals.css'
-
 const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-serif',
   display: 'swap',
 })
-
 const greatVibes = Great_Vibes({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-script',
   display: 'swap',
 })
-
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 })
-
 export const metadata: Metadata = {
   title: 'Meus 15 Anos - Ana Julia',
   description: 'Convite para os 15 anos de Ana Julia - 10 de outubro de 2026, às 19h',
@@ -44,12 +40,12 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
 }
-
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   colorScheme: 'light',
   themeColor: '#d6006e',
 }
-
 export default function RootLayout({
   children,
 }: Readonly<{
