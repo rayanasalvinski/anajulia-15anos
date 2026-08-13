@@ -86,7 +86,7 @@ export function BirthdayInvite() {
         />
 
         {/* Conteúdo */}
-        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-6 pt-10 sm:min-h-[780px]">
+        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-4 pt-6 sm:pb-6 sm:pt-10 sm:min-h-[780px]">
           {view === "home" && <HomeView onNavigate={setView} />}
           {view === "localizacao" && <LocalizacaoView onBack={() => setView("home")} />}
           {view === "presenca" && <PresencaView onBack={() => setView("home")} />}
@@ -103,25 +103,26 @@ function InviteHeader() {
     <header className="text-center">
       <div className="flex items-end justify-center gap-2">
         <span
-          className="font-serif text-8xl font-black leading-none text-brand"
+          className="font-serif text-6xl sm:text-8xl font-black leading-none text-brand"
           style={{ textShadow: "0 4px 16px oklch(0.42 0.2 355 / 0.55)" }}
         >
           15
         </span>
         <span
-          className="mb-1 font-script text-4xl leading-none text-brand-deep"
+          className="mb-1 font-script text-3xl sm:text-4xl leading-none text-brand-deep"
           style={{ textShadow: "0 2px 8px oklch(0.98 0.02 350 / 0.9)" }}
         >
           anos
         </span>
       </div>
       <h1
-        className="mt-1 font-script text-6xl leading-tight text-brand-deep"
+        className="mt-1 font-script text-4xl sm:text-6xl leading-tight text-brand-deep"
         style={{ textShadow: "0 2px 10px oklch(0.98 0.02 350 / 0.9)" }}
       >
         {FESTA.nome}
       </h1>
     </header>
+
   )
 }
 
@@ -131,12 +132,12 @@ function HomeView({ onNavigate }: { onNavigate: (v: View) => void }) {
     <div className="flex flex-1 flex-col">
       <InviteHeader />
 
-      <div className="mt-6 space-y-3 text-center">
+      <div className="mt-3 sm:mt-6 space-y-2 sm:space-y-3 text-center">
         <p className="text-pretty text-sm font-medium leading-relaxed text-brand-deep">
           Para viver as emoções deste dia tão importante, quero estar ao lado de pessoas especiais como você!
         </p>
         <p
-          className="font-serif text-lg font-bold text-brand-deep"
+          className="font-serif text-base sm:text-lg font-bold text-brand-deep"
           style={{ textShadow: "0 1px 6px oklch(0.98 0.02 350 / 0.8)" }}
         >
           Conto com a sua presença!
@@ -144,12 +145,12 @@ function HomeView({ onNavigate }: { onNavigate: (v: View) => void }) {
       </div>
 
       {/* Data */}
-      <div className="mx-auto mt-6 flex items-stretch gap-3 rounded-2xl border border-border bg-surface/90 px-4 py-3 shadow-md shadow-brand/10 backdrop-blur-sm">
+      <div className="mx-auto mt-4 sm:mt-6 flex items-stretch gap-3 rounded-2xl border border-border bg-surface/90 px-4 py-2.5 sm:py-3 shadow-md shadow-brand/10 backdrop-blur-sm">
         <div className="flex flex-col items-center justify-center pr-3 text-right">
           <span className="text-[0.7rem] font-bold uppercase tracking-widest text-brand-deep">{FESTA.diaSemana}</span>
         </div>
         <div className="flex flex-col items-center justify-center border-x border-border px-4">
-          <span className="font-serif text-5xl font-bold leading-none text-brand">{FESTA.dia}</span>
+          <span className="font-serif text-4xl sm:text-5xl font-bold leading-none text-brand">{FESTA.dia}</span>
           <span className="mt-1 text-[0.7rem] font-bold uppercase tracking-widest text-brand-deep">{FESTA.mes}</span>
         </div>
         <div className="flex flex-col items-center justify-center pl-3">
@@ -159,7 +160,7 @@ function HomeView({ onNavigate }: { onNavigate: (v: View) => void }) {
       </div>
 
       {/* Traje e avisos */}
-      <div className="mx-auto mt-4 w-full space-y-1.5 rounded-2xl border border-border bg-surface/90 px-4 py-3 text-center backdrop-blur-sm">
+      <div className="mx-auto mt-3 sm:mt-4 w-full space-y-1.5 rounded-2xl border border-border bg-surface/90 px-4 py-2.5 sm:py-3 text-center backdrop-blur-sm">
         <p className="text-sm font-semibold text-brand-deep">
           Traje: <span className="text-brand">{FESTA.traje}</span>
         </p>
@@ -168,7 +169,7 @@ function HomeView({ onNavigate }: { onNavigate: (v: View) => void }) {
       </div>
 
       {/* Botões */}
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="mt-4 sm:mt-8 flex flex-col gap-2 sm:gap-3">
         <ActionButton icon={<MapPin className="size-5" />} label="Localização" onClick={() => onNavigate("localizacao")} />
         <ActionButton
           icon={<MessageCircle className="size-5" />}
@@ -182,9 +183,9 @@ function HomeView({ onNavigate }: { onNavigate: (v: View) => void }) {
         />
       </div>
 
-      <p className="mt-4 text-center text-xs text-muted-foreground">Clique nos botões para interagir</p>
+      <p className="mt-2 sm:mt-4 text-center text-xs text-muted-foreground">Clique nos botões para interagir</p>
 
-      <footer className="mt-auto flex items-center justify-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
+      <footer className="mt-auto flex items-center justify-center gap-2 border-t border-border pt-2 sm:pt-4 text-xs text-muted-foreground">
         <Share2 className="size-3.5" />
         <span>Compartilhe este convite</span>
       </footer>
@@ -206,7 +207,7 @@ function ActionButton({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-full bg-brand-soft px-6 py-3.5 text-brand-deep shadow-md shadow-brand/20 transition-all duration-200 hover:brightness-105 active:scale-[0.98]"
+      className="group flex w-full items-center gap-3 rounded-full bg-brand-soft px-6 py-3 sm:py-3.5 text-brand-deep shadow-md shadow-brand/20 transition-all duration-200 hover:brightness-105 active:scale-[0.98]"
     >
       <span className="grid size-9 place-items-center rounded-full bg-surface text-brand transition-transform group-hover:scale-110">
         {icon}
