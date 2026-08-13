@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   MapPin,
   Gift,
@@ -17,6 +17,7 @@ import {
   Ticket,
   CalendarHeart,
   Clock,
+  ChevronDown,
 } from "lucide-react"
 
 type View = "home" | "localizacao" | "presenca" | "presente"
@@ -67,11 +68,35 @@ async function registrarConfirmacaoNoFormulario(nome: string, acompanhantes: str
   }
 }
 
+/* ---------- Indicador de "role para baixo" (mobile) ---------- */
+function ScrollHint() {
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 30) setVisible(false)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  if (!visible) return null
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">
+      <div className="animate-bounce rounded-full bg-brand p-2 shadow-lg shadow-brand/40 ring-4 ring-white/60">
+        <ChevronDown className="size-5 text-white" strokeWidth={3} />
+      </div>
+    </div>
+  )
+}
+
 export function BirthdayInvite() {
   const [view, setView] = useState<View>("home")
 
   return (
     <main className="flex min-h-dvh w-full items-center justify-center bg-[radial-gradient(circle_at_50%_0%,oklch(0.6_0.2_352),oklch(0.35_0.18_353))] p-0 sm:p-6">
+      <ScrollHint />
       {/* Moldura do celular */}
       <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden bg-card shadow-[0_25px_80px_-20px_rgba(150,0,80,0.6)] sm:rounded-[2.75rem] sm:border-[10px] sm:border-neutral-900">
         {/* Fundo glitter */}
@@ -101,20 +126,12 @@ export function BirthdayInvite() {
 function InviteHeader() {
   return (
     <header className="text-center">
-      <div className="flex items-end justify-center gap-2">
-        <span
-          className="font-serif text-6xl sm:text-8xl font-black leading-none text-brand"
-          style={{ textShadow: "0 4px 16px oklch(0.42 0.2 355 / 0.55)" }}
-        >
-          15
-        </span>
-        <span
-          className="mb-1 font-script text-3xl sm:text-4xl leading-none text-brand-deep"
-          style={{ textShadow: "0 2px 8px oklch(0.98 0.02 350 / 0.9)" }}
-        >
-          anos
-        </span>
-      </div>
+      <p
+        className="font-serif text-6xl sm:text-8xl font-bold text-brand"
+        style={{ textShadow: "0 2px 10px oklch(0.98 0.02 350 / 0.9)" }}
+      >
+        15 anos
+      </p>
       <h1
         className="mt-1 font-script text-4xl sm:text-6xl leading-tight text-brand-deep"
         style={{ textShadow: "0 2px 10px oklch(0.98 0.02 350 / 0.9)" }}
