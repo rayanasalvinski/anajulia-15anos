@@ -94,14 +94,19 @@ function ScrollHint() {
 export function BirthdayInvite() {
   const [view, setView] = useState<View>("home")
 
+  const navigate = (v: View) => {
+    setView(v)
+    window.scrollTo(0, 0)
+  }
+
   return (
     <main className="flex min-h-dvh w-full items-center justify-center bg-[radial-gradient(circle_at_50%_0%,oklch(0.6_0.2_352),oklch(0.35_0.18_353))] p-0 sm:p-6">
-      <ScrollHint />
+      <ScrollHint key={view} />
       {/* Moldura do celular */}
       <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden bg-card shadow-[0_25px_80px_-20px_rgba(150,0,80,0.6)] sm:rounded-[2.75rem] sm:border-[10px] sm:border-neutral-900">
         {/* Fundo glitter */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-90"
+          className="absolute inset-0 scale-110 bg-cover bg-center opacity-90"
           style={{ backgroundImage: "url(/glitter-pink-bg.png)" }}
           aria-hidden="true"
         />
@@ -112,10 +117,10 @@ export function BirthdayInvite() {
 
         {/* Conteúdo */}
         <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-4 pt-6 sm:pb-6 sm:pt-10 sm:min-h-[780px]">
-          {view === "home" && <HomeView onNavigate={setView} />}
-          {view === "localizacao" && <LocalizacaoView onBack={() => setView("home")} />}
-          {view === "presenca" && <PresencaView onBack={() => setView("home")} />}
-          {view === "presente" && <PresenteView onBack={() => setView("home")} />}
+          {view === "home" && <HomeView onNavigate={navigate} />}
+          {view === "localizacao" && <LocalizacaoView onBack={() => navigate("home")} />}
+          {view === "presenca" && <PresencaView onBack={() => navigate("home")} />}
+          {view === "presente" && <PresenteView onBack={() => navigate("home")} />}
         </div>
       </div>
     </main>
@@ -133,7 +138,7 @@ function InviteHeader() {
         15 anos
       </p>
       <h1
-        className="mt-1 font-script text-4xl sm:text-6xl leading-tight text-brand-deep"
+        className="mt-1 font-script text-5xl sm:text-7xl leading-tight text-brand-deep"
         style={{ textShadow: "0 2px 10px oklch(0.98 0.02 350 / 0.9)" }}
       >
         {FESTA.nome}
@@ -249,17 +254,22 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
       <div className="text-center">
         <p
           className="font-serif text-3xl font-bold text-brand"
-          style={{ textShadow: "0 2px 10px oklch(0.98 0.02 350 / 0.9)" }}
+          style={{ textShadow: "0 0 14px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.9), 0 2px 6px rgba(120,0,60,0.35)" }}
         >
           15 anos
         </p>
         <p
           className="font-script text-4xl leading-tight text-brand-deep"
-          style={{ textShadow: "0 2px 8px oklch(0.98 0.02 350 / 0.9)" }}
+          style={{ textShadow: "0 0 14px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.9), 0 2px 6px rgba(120,0,60,0.35)" }}
         >
           {FESTA.nome}
         </p>
-        <h2 className="mt-2 font-serif text-2xl font-bold text-foreground">{title}</h2>
+        <h2
+          className="mt-2 font-serif text-2xl font-bold text-foreground"
+          style={{ textShadow: "0 0 10px rgba(255,255,255,0.9), 0 1px 4px rgba(120,0,60,0.25)" }}
+        >
+          {title}
+        </h2>
         <div className="mx-auto mt-1 h-px w-24 bg-border" />
       </div>
     </div>
