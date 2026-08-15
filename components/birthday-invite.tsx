@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   MapPin,
   Gift,
@@ -18,6 +18,8 @@ import {
   CalendarHeart,
   Clock,
   ChevronDown,
+  Music,
+  Pause,
 } from "lucide-react"
 
 type View = "home" | "localizacao" | "presenca" | "presente"
@@ -43,19 +45,19 @@ const FESTA = {
 const GOOGLE_FORM_ID = "1FAIpQLSd1LKf48OipATQR1lpz_yKTIFvsyw35II-QiJMdOFKC00oDoA"
 const GOOGLE_FORM_ACTION = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`
 const GOOGLE_FORM_ENTRY_NOME = "entry.442733613"
-const GOOGLE_FORM_ENTRY_ACOMPANHANTES = "entry.1135942399"
+const GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS = "entry.1135942399"
+const GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS = "entry.57422357"
 
 /**
  * Envia a confirmação para o Google Forms de forma silenciosa (sem redirecionar o usuário).
  * Usa modo "no-cors" porque o Google Forms não retorna cabeçalhos CORS, mas o envio funciona normalmente.
  */
-async function registrarConfirmacaoNoFormulario(nome: string, acompanhantes: string) {
+async function registrarConfirmacaoNoFormulario(nome: string, acompanhantesAdultos: string, acompanhantesCriancas: string) {
   try {
     const dados = new URLSearchParams()
     dados.append(GOOGLE_FORM_ENTRY_NOME, nome)
-    // O campo "Acompanhantes" no formulário aceita resposta livre via "outra opção"
-    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES, "__other_option__")
-    dados.append(`${GOOGLE_FORM_ENTRY_ACOMPANHANTES}.other_option_response`, acompanhantes)
+    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS, acompanhantesAdultos)
+    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS, acompanhantesCriancas)
 
     await fetch(GOOGLE_FORM_ACTION, {
       method: "POST",
@@ -83,7 +85,7 @@ function ScrollHint() {
   if (!visible) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center sm:hidden">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">
       <div className="animate-bounce rounded-full bg-brand p-2 shadow-lg shadow-brand/40 ring-4 ring-white/60">
         <ChevronDown className="size-5 text-white" strokeWidth={3} />
       </div>
@@ -91,23 +93,72 @@ function ScrollHint() {
   )
 }
 
-/* ---------- Player de música (Spotify) ---------- */
+/* ---------- Player de música (Spotify, controlado via IFrame API) ---------- */
+const SPOTIFY_TRACK_URI = "spotify:track:2yKqqZQOYhzAfmU0ye6tVQ"
+
 function MusicPlayer() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controllerRef = useRef<any>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [ready, setReady] = useState(false)
+
+  // Carrega a API do Spotify e cria o controlador (o player em si fica escondido)
+  useEffect(() => {
+    const w = window as any
+
+    function setup(IFrameAPI: any) {
+      if (!containerRef.current) return
+      IFrameAPI.createController(
+        containerRef.current,
+        { uri: SPOTIFY_TRACK_URI, width: "0", height: "0" },
+        (EmbedController: any) => {
+          controllerRef.current = EmbedController
+          setReady(true)
+          EmbedController.addListener("playback_update", (e: any) => {
+            setIsPlaying(!e.data.isPaused)
+          })
+        },
+      )
+    }
+
+    if (w.Spotify?.Embed) {
+      setup(w.Spotify.Embed)
+    } else {
+      w.onSpotifyIframeApiReady = setup
+      if (!document.getElementById("spotify-iframe-api")) {
+        const script = document.createElement("script")
+        script.id = "spotify-iframe-api"
+        script.src = "https://open.spotify.com/embed/iframe-api/v1"
+        script.async = true
+        document.body.appendChild(script)
+      }
+    }
+  }, [])
+
+  // Assim que a pessoa tocar em qualquer lugar da página pela primeira vez, a música começa sozinha
+  useEffect(() => {
+    if (!ready) return
+    const tryPlay = () => controllerRef.current?.play()
+    document.addEventListener("click", tryPlay, { once: true })
+    document.addEventListener("touchstart", tryPlay, { once: true })
+    return () => {
+      document.removeEventListener("click", tryPlay)
+      document.removeEventListener("touchstart", tryPlay)
+    }
+  }, [ready])
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[420px] px-3 pb-3">
-      <iframe
-        title="Young and Beautiful - Lana Del Rey"
-        style={{ borderRadius: 14 }}
-        src="https://open.spotify.com/embed/track/2yKqqZQOYhzAfmU0ye6tVQ?utm_source=generator&theme=0"
-        width="100%"
-        height="80"
-        frameBorder="0"
-        allowFullScreen
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
-        className="shadow-lg shadow-black/20"
-      />
-    </div>
+    <>
+      <div ref={containerRef} className="hidden" aria-hidden="true" />
+      <button
+        type="button"
+        onClick={() => controllerRef.current?.togglePlay()}
+        aria-label={isPlaying ? "Pausar música" : "Tocar música"}
+        className="fixed bottom-4 right-4 z-40 grid size-12 place-items-center rounded-full bg-brand text-white shadow-lg shadow-brand/40 ring-4 ring-white/60 transition-transform active:scale-95"
+      >
+        {isPlaying ? <Pause className="size-5" /> : <Music className="size-5" />}
+      </button>
+    </>
   )
 }
 
@@ -137,7 +188,7 @@ export function BirthdayInvite() {
         />
 
         {/* Conteúdo */}
-        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-24 pt-6 sm:pb-24 sm:pt-10 sm:min-h-[780px]">
+        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-6 pt-6 sm:pb-6 sm:pt-10 sm:min-h-[780px]">
           {view === "home" && <HomeView onNavigate={navigate} />}
           {view === "localizacao" && <LocalizacaoView onBack={() => navigate("home")} />}
           {view === "presenca" && <PresencaView onBack={() => navigate("home")} />}
@@ -338,16 +389,17 @@ function LocalizacaoView({ onBack }: { onBack: () => void }) {
 /* ---------- Tela: Confirmação de Presença ---------- */
 function PresencaView({ onBack }: { onBack: () => void }) {
   const [nome, setNome] = useState("")
-  const [acompanhantes, setAcompanhantes] = useState("0")
+  const [acompanhantesAdultos, setAcompanhantesAdultos] = useState("0")
+  const [acompanhantesCriancas, setAcompanhantesCriancas] = useState("0")
   const [enviado, setEnviado] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     // Registra a confirmação na planilha (via Google Forms) em paralelo, sem travar o fluxo
-    registrarConfirmacaoNoFormulario(nome, acompanhantes)
+    registrarConfirmacaoNoFormulario(nome, acompanhantesAdultos, acompanhantesCriancas)
 
-    const texto = `Olá! Confirmo presença nos 15 anos da ${FESTA.nome}.%0ANome: ${nome}%0AAcompanhantes: ${acompanhantes}`
+    const texto = `Olá! Confirmo presença nos 15 anos da ${FESTA.nome}.%0ANome: ${nome}%0AAcompanhantes adultos: ${acompanhantesAdultos}%0ACrianças até 10 anos: ${acompanhantesCriancas}`
     window.open(`https://wa.me/${FESTA.whatsapp}?text=${texto}`, "_blank")
     setEnviado(true)
   }
@@ -394,18 +446,36 @@ function PresencaView({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="acompanhantes" className="text-sm font-semibold text-brand-deep">
-              Acompanhantes
+            <label htmlFor="acompanhantesAdultos" className="text-sm font-semibold text-brand-deep">
+              Acompanhantes adultos
             </label>
             <select
-              id="acompanhantes"
-              value={acompanhantes}
-              onChange={(e) => setAcompanhantes(e.target.value)}
+              id="acompanhantesAdultos"
+              value={acompanhantesAdultos}
+              onChange={(e) => setAcompanhantesAdultos(e.target.value)}
               className="rounded-xl border border-border bg-surface/90 px-4 py-3 text-sm text-brand-deep outline-none backdrop-blur-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/30"
             >
               {["0", "1", "2", "3", "4"].map((n) => (
                 <option key={n} value={n}>
-                  {n === "0" ? "Somente eu" : `${n} acompanhante${n === "1" ? "" : "s"}`}
+                  {n === "0" ? "Nenhum" : `${n} adulto${n === "1" ? "" : "s"}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="acompanhantesCriancas" className="text-sm font-semibold text-brand-deep">
+              Crianças até 10 anos
+            </label>
+            <select
+              id="acompanhantesCriancas"
+              value={acompanhantesCriancas}
+              onChange={(e) => setAcompanhantesCriancas(e.target.value)}
+              className="rounded-xl border border-border bg-surface/90 px-4 py-3 text-sm text-brand-deep outline-none backdrop-blur-sm transition-colors focus:border-primary focus:ring-2 focus:ring-primary/30"
+            >
+              {["0", "1", "2", "3", "4"].map((n) => (
+                <option key={n} value={n}>
+                  {n === "0" ? "Nenhuma" : `${n} criança${n === "1" ? "" : "s"}`}
                 </option>
               ))}
             </select>
