@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   MapPin,
   Gift,
@@ -91,20 +91,67 @@ function ScrollHint() {
   )
 }
 
-/* ---------- Player de música (Spotify) ---------- */
+/* ---------- Player de música (Spotify, visível + controlável) ---------- */
+const SPOTIFY_TRACK_URI = "spotify:track:2yKqqZQOYhzAfmU0ye6tVQ"
+
 function MusicPlayer() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controllerRef = useRef<any>(null)
+  const [ready, setReady] = useState(false)
+
+  // Cria o player oficial do Spotify DENTRO do próprio contêiner visível (mesmo lugar de sempre)
+  useEffect(() => {
+    const w = window as any
+
+    function setup(IFrameAPI: any) {
+      if (!containerRef.current) return
+      IFrameAPI.createController(
+        containerRef.current,
+        { uri: SPOTIFY_TRACK_URI, width: "100%", height: "80" },
+        (EmbedController: any) => {
+          controllerRef.current = EmbedController
+          setReady(true)
+        },
+      )
+    }
+
+    if (w.Spotify?.Embed) {
+      setup(w.Spotify.Embed)
+    } else {
+      w.onSpotifyIframeApiReady = setup
+      if (!document.getElementById("spotify-iframe-api")) {
+        const script = document.createElement("script")
+        script.id = "spotify-iframe-api"
+        script.src = "https://open.spotify.com/embed/iframe-api/v1"
+        script.async = true
+        document.body.appendChild(script)
+      }
+    }
+  }, [])
+
+  // No primeiro toque em qualquer lugar da página (inclusive nos botões), a música começa sozinha
+  useEffect(() => {
+    if (!ready) return
+    const tryPlay = () => {
+      try {
+        controllerRef.current?.play()
+      } catch (error) {
+        console.error("Não foi possível iniciar a música automaticamente:", error)
+      }
+    }
+    document.addEventListener("click", tryPlay, { once: true, capture: true })
+    document.addEventListener("touchstart", tryPlay, { once: true, capture: true })
+    return () => {
+      document.removeEventListener("click", tryPlay, { capture: true })
+      document.removeEventListener("touchstart", tryPlay, { capture: true })
+    }
+  }, [ready])
+
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[420px] px-3 pb-3">
-      <iframe
-        title="Young and Beautiful - Lana Del Rey"
-        style={{ borderRadius: 14 }}
-        src="https://open.spotify.com/embed/track/2yKqqZQOYhzAfmU0ye6tVQ?utm_source=generator&theme=0"
-        width="100%"
-        height="80"
-        frameBorder="0"
-        allowFullScreen
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
+      <div
+        ref={containerRef}
+        style={{ borderRadius: 14, minHeight: 80, overflow: "hidden" }}
         className="shadow-lg shadow-black/20"
       />
     </div>
