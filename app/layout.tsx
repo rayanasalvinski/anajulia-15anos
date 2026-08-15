@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   title: 'Meus 15 Anos - Ana Julia',
   description: 'Convite para os 15 anos de Ana Julia - 10 de outubro de 2026, às 19h',
   generator: 'v0.app',
+  metadataBase: new URL('https://ana-julia15anos.vercel.app'),
   icons: {
     icon: [
       {
@@ -42,6 +43,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Meus 15 Anos - Ana Julia',
     description: 'Convite para os 15 anos de Ana Julia - 10 de outubro de 2026, às 19h',
+    url: 'https://ana-julia15anos.vercel.app',
+    type: 'website',
     images: [
       {
         url: 'https://ana-julia15anos.vercel.app/og-image.png',
