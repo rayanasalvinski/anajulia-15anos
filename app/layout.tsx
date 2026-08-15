@@ -39,6 +39,24 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+  openGraph: {
+    title: 'Meus 15 Anos - Ana Julia',
+    description: 'Convite para os 15 anos de Ana Julia - 10 de outubro de 2026, às 19h',
+    images: [
+      {
+        url: 'https://ana-julia15anos.vercel.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Convite 15 anos Ana Julia',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Meus 15 Anos - Ana Julia',
+    description: 'Convite para os 15 anos de Ana Julia - 10 de outubro de 2026, às 19h',
+    images: ['https://ana-julia15anos.vercel.app/og-image.png'],
+  },
 }
 export const viewport: Viewport = {
   width: 'device-width',
