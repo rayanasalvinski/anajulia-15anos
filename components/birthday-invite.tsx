@@ -110,7 +110,7 @@ function MusicPlayer() {
       if (!containerRef.current) return
       IFrameAPI.createController(
         containerRef.current,
-        { uri: SPOTIFY_TRACK_URI, width: "0", height: "0" },
+        { uri: SPOTIFY_TRACK_URI, width: "300", height: "80" },
         (EmbedController: any) => {
           controllerRef.current = EmbedController
           setReady(true)
@@ -138,7 +138,13 @@ function MusicPlayer() {
   // Assim que a pessoa tocar em qualquer lugar da página pela primeira vez, a música começa sozinha
   useEffect(() => {
     if (!ready) return
-    const tryPlay = () => controllerRef.current?.play()
+    const tryPlay = () => {
+      try {
+        controllerRef.current?.play()
+      } catch (error) {
+        console.error("Não foi possível iniciar a música automaticamente:", error)
+      }
+    }
     document.addEventListener("click", tryPlay, { once: true })
     document.addEventListener("touchstart", tryPlay, { once: true })
     return () => {
@@ -149,7 +155,12 @@ function MusicPlayer() {
 
   return (
     <>
-      <div ref={containerRef} className="hidden" aria-hidden="true" />
+      <div
+        ref={containerRef}
+        className="fixed left-0 top-0 h-px w-px overflow-hidden opacity-0"
+        style={{ pointerEvents: "none" }}
+        aria-hidden="true"
+      />
       <button
         type="button"
         onClick={() => controllerRef.current?.togglePlay()}
