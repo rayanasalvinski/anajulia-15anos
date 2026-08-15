@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import {
   MapPin,
   Gift,
@@ -18,8 +18,6 @@ import {
   CalendarHeart,
   Clock,
   ChevronDown,
-  Music,
-  Pause,
 } from "lucide-react"
 
 type View = "home" | "localizacao" | "presenca" | "presente"
@@ -85,7 +83,7 @@ function ScrollHint() {
   if (!visible) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">
+    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center sm:hidden">
       <div className="animate-bounce rounded-full bg-brand p-2 shadow-lg shadow-brand/40 ring-4 ring-white/60">
         <ChevronDown className="size-5 text-white" strokeWidth={3} />
       </div>
@@ -93,83 +91,23 @@ function ScrollHint() {
   )
 }
 
-/* ---------- Player de música (Spotify, controlado via IFrame API) ---------- */
-const SPOTIFY_TRACK_URI = "spotify:track:2yKqqZQOYhzAfmU0ye6tVQ"
-
+/* ---------- Player de música (Spotify) ---------- */
 function MusicPlayer() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const controllerRef = useRef<any>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [ready, setReady] = useState(false)
-
-  // Carrega a API do Spotify e cria o controlador (o player em si fica escondido)
-  useEffect(() => {
-    const w = window as any
-
-    function setup(IFrameAPI: any) {
-      if (!containerRef.current) return
-      IFrameAPI.createController(
-        containerRef.current,
-        { uri: SPOTIFY_TRACK_URI, width: "300", height: "80" },
-        (EmbedController: any) => {
-          controllerRef.current = EmbedController
-          setReady(true)
-          EmbedController.addListener("playback_update", (e: any) => {
-            setIsPlaying(!e.data.isPaused)
-          })
-        },
-      )
-    }
-
-    if (w.Spotify?.Embed) {
-      setup(w.Spotify.Embed)
-    } else {
-      w.onSpotifyIframeApiReady = setup
-      if (!document.getElementById("spotify-iframe-api")) {
-        const script = document.createElement("script")
-        script.id = "spotify-iframe-api"
-        script.src = "https://open.spotify.com/embed/iframe-api/v1"
-        script.async = true
-        document.body.appendChild(script)
-      }
-    }
-  }, [])
-
-  // Assim que a pessoa tocar em qualquer lugar da página pela primeira vez, a música começa sozinha
-  useEffect(() => {
-    if (!ready) return
-    const tryPlay = () => {
-      try {
-        controllerRef.current?.play()
-      } catch (error) {
-        console.error("Não foi possível iniciar a música automaticamente:", error)
-      }
-    }
-    document.addEventListener("click", tryPlay, { once: true })
-    document.addEventListener("touchstart", tryPlay, { once: true })
-    return () => {
-      document.removeEventListener("click", tryPlay)
-      document.removeEventListener("touchstart", tryPlay)
-    }
-  }, [ready])
-
   return (
-    <>
-      <div
-        ref={containerRef}
-        className="fixed left-0 top-0 h-px w-px overflow-hidden opacity-0"
-        style={{ pointerEvents: "none" }}
-        aria-hidden="true"
+    <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[420px] px-3 pb-3">
+      <iframe
+        title="Young and Beautiful - Lana Del Rey"
+        style={{ borderRadius: 14 }}
+        src="https://open.spotify.com/embed/track/2yKqqZQOYhzAfmU0ye6tVQ?utm_source=generator&theme=0"
+        width="100%"
+        height="80"
+        frameBorder="0"
+        allowFullScreen
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        className="shadow-lg shadow-black/20"
       />
-      <button
-        type="button"
-        onClick={() => controllerRef.current?.togglePlay()}
-        aria-label={isPlaying ? "Pausar música" : "Tocar música"}
-        className="fixed bottom-4 right-4 z-40 grid size-12 place-items-center rounded-full bg-brand text-white shadow-lg shadow-brand/40 ring-4 ring-white/60 transition-transform active:scale-95"
-      >
-        {isPlaying ? <Pause className="size-5" /> : <Music className="size-5" />}
-      </button>
-    </>
+    </div>
   )
 }
 
@@ -199,7 +137,7 @@ export function BirthdayInvite() {
         />
 
         {/* Conteúdo */}
-        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-6 pt-6 sm:pb-6 sm:pt-10 sm:min-h-[780px]">
+        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-24 pt-6 sm:pb-24 sm:pt-10 sm:min-h-[780px]">
           {view === "home" && <HomeView onNavigate={navigate} />}
           {view === "localizacao" && <LocalizacaoView onBack={() => navigate("home")} />}
           {view === "presenca" && <PresencaView onBack={() => navigate("home")} />}
