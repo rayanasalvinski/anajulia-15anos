@@ -83,10 +83,30 @@ function ScrollHint() {
   if (!visible) return null
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">
+    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center sm:hidden">
       <div className="animate-bounce rounded-full bg-brand p-2 shadow-lg shadow-brand/40 ring-4 ring-white/60">
         <ChevronDown className="size-5 text-white" strokeWidth={3} />
       </div>
+    </div>
+  )
+}
+
+/* ---------- Player de música (Spotify) ---------- */
+function MusicPlayer() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[420px] px-3 pb-3">
+      <iframe
+        title="Young and Beautiful - Lana Del Rey"
+        style={{ borderRadius: 14 }}
+        src="https://open.spotify.com/embed/track/2yKqqZQOYhzAfmU0ye6tVQ?utm_source=generator&theme=0"
+        width="100%"
+        height="80"
+        frameBorder="0"
+        allowFullScreen
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        className="shadow-lg shadow-black/20"
+      />
     </div>
   )
 }
@@ -102,6 +122,7 @@ export function BirthdayInvite() {
   return (
     <main className="flex min-h-dvh w-full items-center justify-center bg-[radial-gradient(circle_at_50%_0%,oklch(0.6_0.2_352),oklch(0.35_0.18_353))] p-0 sm:p-6">
       <ScrollHint key={view} />
+      <MusicPlayer />
       {/* Moldura do celular */}
       <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden bg-card shadow-[0_25px_80px_-20px_rgba(150,0,80,0.6)] sm:rounded-[2.75rem] sm:border-[10px] sm:border-neutral-900">
         {/* Fundo glitter */}
@@ -116,7 +137,7 @@ export function BirthdayInvite() {
         />
 
         {/* Conteúdo */}
-        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-4 pt-6 sm:pb-6 sm:pt-10 sm:min-h-[780px]">
+        <div className="relative z-10 flex min-h-dvh flex-col px-6 pb-24 pt-6 sm:pb-24 sm:pt-10 sm:min-h-[780px]">
           {view === "home" && <HomeView onNavigate={navigate} />}
           {view === "localizacao" && <LocalizacaoView onBack={() => navigate("home")} />}
           {view === "presenca" && <PresencaView onBack={() => navigate("home")} />}
