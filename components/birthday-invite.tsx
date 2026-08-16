@@ -39,49 +39,21 @@ const FESTA = {
   confirmarAte: "01/10/2026",
 }
 
-// Formulário do Google que registra a lista de confirmados numa planilha
-const GOOGLE_FORM_ID = "1FAIpQLSd1LKf48OipATQR1lpz_yKTIFvsyw35II-QiJMdOFKC00oDoA"
-const GOOGLE_FORM_ACTION = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`
-const GOOGLE_FORM_ENTRY_NOME = "entry.442733613"
-const GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS = "entry.1135942399"
-const GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS = "entry.57422357"
-
-const GOOGLE_FORM_TARGET_FRAME = "google-forms-hidden-frame"
+// A submissão para o Google Forms agora acontece pelo lado do servidor (ver app/api/confirmar-presenca)
 
 /**
- * Envia a confirmação para o Google Forms de forma silenciosa (sem redirecionar o usuário).
- * Cria um formulário HTML de verdade e o envia mirando num iframe escondido — é exatamente o
- * mesmo mecanismo de um envio manual do formulário, o método mais confiável que existe pra isso.
+ * Envia a confirmação para a nossa própria rota de API (mesmo domínio do site), que por sua vez
+ * registra no Google Forms pelo lado do servidor — evita bloqueios do navegador e é bem mais confiável.
  */
 function registrarConfirmacaoNoFormulario(nome: string, acompanhantesAdultos: string, acompanhantesCriancas: string) {
-  try {
-    const form = document.createElement("form")
-    form.action = GOOGLE_FORM_ACTION
-    form.method = "POST"
-    form.target = GOOGLE_FORM_TARGET_FRAME
-    form.style.display = "none"
-
-    const campos: Record<string, string> = {
-      [GOOGLE_FORM_ENTRY_NOME]: nome,
-      [GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS]: acompanhantesAdultos,
-      [GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS]: acompanhantesCriancas,
-    }
-
-    Object.entries(campos).forEach(([name, value]) => {
-      const input = document.createElement("input")
-      input.type = "hidden"
-      input.name = name
-      input.value = value
-      form.appendChild(input)
-    })
-
-    document.body.appendChild(form)
-    form.submit()
-    setTimeout(() => form.remove(), 3000)
-  } catch (error) {
+  fetch("/api/confirmar-presenca", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nome, acompanhantesAdultos, acompanhantesCriancas }),
+  }).catch((error) => {
     // Mesmo que o registro falhe, não bloqueia a confirmação via WhatsApp
-    console.error("Não foi possível registrar a confirmação no formulário:", error)
-  }
+    console.error("Não foi possível registrar a confirmação:", error)
+  })
 }
 
 /* ---------- Indicador de "role para baixo" (mobile) ---------- */
@@ -186,11 +158,6 @@ export function BirthdayInvite() {
     <main className="flex min-h-dvh w-full items-center justify-center bg-[radial-gradient(circle_at_50%_0%,oklch(0.6_0.2_352),oklch(0.35_0.18_353))] p-0 sm:p-6">
       <ScrollHint key={view} />
       <MusicPlayer />
-      <iframe
-        name="google-forms-hidden-frame"
-        title="Envio de confirmação"
-        style={{ display: "none" }}
-      />
       {/* Moldura do celular */}
       <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden bg-card shadow-[0_25px_80px_-20px_rgba(150,0,80,0.6)] sm:rounded-[2.75rem] sm:border-[10px] sm:border-neutral-900">
         {/* Fundo glitter */}
