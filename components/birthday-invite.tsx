@@ -46,29 +46,38 @@ const GOOGLE_FORM_ENTRY_NOME = "entry.442733613"
 const GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS = "entry.1135942399"
 const GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS = "entry.57422357"
 
+const GOOGLE_FORM_TARGET_FRAME = "google-forms-hidden-frame"
+
 /**
  * Envia a confirmação para o Google Forms de forma silenciosa (sem redirecionar o usuário).
- * Usa sendBeacon porque, ao contrário do fetch normal, ele garante o envio mesmo quando a página
- * perde o foco logo em seguida (como acontece aqui, ao abrir o WhatsApp na sequência).
+ * Cria um formulário HTML de verdade e o envia mirando num iframe escondido — é exatamente o
+ * mesmo mecanismo de um envio manual do formulário, o método mais confiável que existe pra isso.
  */
 function registrarConfirmacaoNoFormulario(nome: string, acompanhantesAdultos: string, acompanhantesCriancas: string) {
   try {
-    const dados = new URLSearchParams()
-    dados.append(GOOGLE_FORM_ENTRY_NOME, nome)
-    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS, acompanhantesAdultos)
-    dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS, acompanhantesCriancas)
+    const form = document.createElement("form")
+    form.action = GOOGLE_FORM_ACTION
+    form.method = "POST"
+    form.target = GOOGLE_FORM_TARGET_FRAME
+    form.style.display = "none"
 
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(GOOGLE_FORM_ACTION, dados)
-    } else {
-      // Navegadores muito antigos sem suporte a sendBeacon: usa fetch com keepalive como alternativa
-      fetch(GOOGLE_FORM_ACTION, {
-        method: "POST",
-        mode: "no-cors",
-        body: dados,
-        keepalive: true,
-      })
+    const campos: Record<string, string> = {
+      [GOOGLE_FORM_ENTRY_NOME]: nome,
+      [GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS]: acompanhantesAdultos,
+      [GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS]: acompanhantesCriancas,
     }
+
+    Object.entries(campos).forEach(([name, value]) => {
+      const input = document.createElement("input")
+      input.type = "hidden"
+      input.name = name
+      input.value = value
+      form.appendChild(input)
+    })
+
+    document.body.appendChild(form)
+    form.submit()
+    setTimeout(() => form.remove(), 3000)
   } catch (error) {
     // Mesmo que o registro falhe, não bloqueia a confirmação via WhatsApp
     console.error("Não foi possível registrar a confirmação no formulário:", error)
@@ -177,6 +186,11 @@ export function BirthdayInvite() {
     <main className="flex min-h-dvh w-full items-center justify-center bg-[radial-gradient(circle_at_50%_0%,oklch(0.6_0.2_352),oklch(0.35_0.18_353))] p-0 sm:p-6">
       <ScrollHint key={view} />
       <MusicPlayer />
+      <iframe
+        name="google-forms-hidden-frame"
+        title="Envio de confirmação"
+        style={{ display: "none" }}
+      />
       {/* Moldura do celular */}
       <div className="relative flex w-full max-w-[420px] flex-col overflow-hidden bg-card shadow-[0_25px_80px_-20px_rgba(150,0,80,0.6)] sm:rounded-[2.75rem] sm:border-[10px] sm:border-neutral-900">
         {/* Fundo glitter */}
