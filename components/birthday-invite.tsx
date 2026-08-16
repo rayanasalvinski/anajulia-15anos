@@ -48,20 +48,27 @@ const GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS = "entry.57422357"
 
 /**
  * Envia a confirmação para o Google Forms de forma silenciosa (sem redirecionar o usuário).
- * Usa modo "no-cors" porque o Google Forms não retorna cabeçalhos CORS, mas o envio funciona normalmente.
+ * Usa sendBeacon porque, ao contrário do fetch normal, ele garante o envio mesmo quando a página
+ * perde o foco logo em seguida (como acontece aqui, ao abrir o WhatsApp na sequência).
  */
-async function registrarConfirmacaoNoFormulario(nome: string, acompanhantesAdultos: string, acompanhantesCriancas: string) {
+function registrarConfirmacaoNoFormulario(nome: string, acompanhantesAdultos: string, acompanhantesCriancas: string) {
   try {
     const dados = new URLSearchParams()
     dados.append(GOOGLE_FORM_ENTRY_NOME, nome)
     dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_ADULTOS, acompanhantesAdultos)
     dados.append(GOOGLE_FORM_ENTRY_ACOMPANHANTES_CRIANCAS, acompanhantesCriancas)
 
-    await fetch(GOOGLE_FORM_ACTION, {
-      method: "POST",
-      mode: "no-cors",
-      body: dados,
-    })
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(GOOGLE_FORM_ACTION, dados)
+    } else {
+      // Navegadores muito antigos sem suporte a sendBeacon: usa fetch com keepalive como alternativa
+      fetch(GOOGLE_FORM_ACTION, {
+        method: "POST",
+        mode: "no-cors",
+        body: dados,
+        keepalive: true,
+      })
+    }
   } catch (error) {
     // Mesmo que o registro falhe, não bloqueia a confirmação via WhatsApp
     console.error("Não foi possível registrar a confirmação no formulário:", error)
